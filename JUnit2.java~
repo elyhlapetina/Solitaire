@@ -1,0 +1,309 @@
+import org.junit.*;
+import static org.junit.Assert.*;
+import java.util.Iterator;
+
+
+
+/**Testing class for HW5. This class tests each method with several set-ups.
+  *The overloaded methods are tested in the same test.
+  * @author Elyh Lapetina
+  */
+
+public class JUnit2 {
+ 
+  
+  /**This helper method compares cards.
+   * 
+   */
+  
+  public void compareCards(Card firstCard,Card secondCard){
+    
+    assertTrue(firstCard.getCurrentSuit().compareTo(secondCard.getCurrentSuit()) == 0);
+    assertTrue(firstCard.getCurrentFace().compareTo(secondCard.getCurrentFace()) == 0);
+    assertTrue(firstCard.getCurrentSuit().getColor().compareTo(secondCard.getCurrentSuit().getColor()) == 0);
+    
+    
+  }
+  
+  /**Helper method to get if two piles are the same
+    * 
+    */
+  public void comparePiles(Pile pile1, Pile pile2){
+    
+    Pile.Node nodeptr = pile1.getFront();
+    Pile.Node nodechecker = pile2.getFront();
+    
+    
+    for(int i = 0; nodeptr != null; i++){
+      compareCards(nodeptr.getElement(), nodechecker.getElement());
+      nodeptr = nodeptr.getNext();
+      nodechecker = nodechecker.getNext();
+      
+    }
+  }
+  
+  
+  /**Test deck constructors and methods
+    */
+  @Test
+  public void testDeck(){
+    //Test creation of custom deck
+    Deck d = new Deck(Card.Face.Two, Card.Face.Four, Card.Suit.Spades, Card.Suit.Hearts);
+    compareCards(d.get(0), new Card(Card.Suit.Spades, Card.Face.Two));
+    compareCards(d.get(1), new Card(Card.Suit.Spades, Card.Face.Three));
+    compareCards(d.get(2), new Card(Card.Suit.Spades, Card.Face.Four));
+    compareCards(d.get(3), new Card(Card.Suit.Hearts, Card.Face.Two));
+    compareCards(d.get(4), new Card(Card.Suit.Hearts, Card.Face.Three));
+    compareCards(d.get(5), new Card(Card.Suit.Hearts, Card.Face.Four));
+    assertTrue(d.getMinFace().compareTo(Card.Face.Two)==0);
+    assertTrue(d.getMaxFace().compareTo(Card.Face.Four)==0);
+    assertTrue(d.getNumberSuits() == 2);
+    d.turnCardsOver();
+    for(int i = 0; i < d.size(); i++){
+      assertTrue(! d.get(i).isFaceUp());
+    }
+  }
+  
+
+    /**
+   * Tests the addToFront method of DoubleLinkedList.
+   */
+  @Test
+  public void testAddToFront() {
+    LinkedList<Integer> list = new LinkedList<Integer>();
+    list.addToFront(3);
+    list.addToFront(2);
+    list.addToFront(1);
+    LinkedList.Node head = list.getFront();
+    LinkedList.Node tail = list.getBack();
+    
+    assertEquals("Testing first node of list", new Integer(1), head.getElement());
+    assertEquals("Testing second node of list", new Integer(2), head.getNext().getElement());
+    assertEquals("Testing third node of list", new Integer(3), head.getNext().getNext().getElement());
+    assertEquals("Testing end of list", null, head.getNext().getNext().getNext());
+    
+    assertEquals("Testing node at back of list", new Integer(3), tail.getElement());
+    assertEquals("Testing next to last node", new Integer(2), tail.getPrevious().getElement());
+    assertEquals("Testing third to last node", new Integer(1), tail.getPrevious().getPrevious().getElement());
+    assertEquals("Testing front of list", null, tail.getPrevious().getPrevious().getPrevious());
+  }
+
+  /**
+   * Tests the addToBack method of DoubleLinkedList.
+   */
+  @Test
+  public void testAddToBack() {
+    LinkedList<Integer> list = new LinkedList<Integer>();
+    list.addToBack(1);
+    list.addToBack(2);
+    list.addToBack(3);
+    LinkedList.Node head = list.getFront();
+    LinkedList.Node tail = list.getBack();
+      
+    assertEquals("Testing last node of list", new Integer(3), tail.getElement());
+    assertEquals("Testing next to last node", new Integer(2), tail.getPrevious().getElement());
+    assertEquals("Testing third to last node", new Integer(1), tail.getPrevious().getPrevious().getElement());
+    assertEquals("Testing front of list", null, tail.getPrevious().getPrevious().getPrevious());
+    
+    assertEquals("Testing node at front of list", new Integer(1), head.getElement());
+    assertEquals("Testing second node of list", new Integer(2), head.getNext().getElement());
+    assertEquals("Testing third node of list", new Integer(3), head.getNext().getNext().getElement());
+    assertEquals("Testing end of list", null, head.getNext().getNext().getNext());
+  }
+  
+  /**
+   * Tests the removeFromFront method of DoubleLinkedList.
+   */
+  @Test
+  public void testRemoveFromFront() throws NoValidMoveException{
+    LinkedList<Integer> list = new LinkedList<Integer>();
+    list.addToFront(1);
+    list.addToFront(2);
+    list.addToFront(3);
+    assertEquals("Removing element of list", new Integer(3), list.removeFromFront());
+    assertEquals("Removing a second element", new Integer(2), list.removeFromFront());
+    assertEquals("Removing a third element", new Integer(1), list.removeFromFront());
+    assertEquals("Removed last element of list", true, list.isEmpty());
+    try {
+      list.removeFromFront();
+      fail("Removing from empty list did not throw an exception.");
+    }
+    catch (java.util.NoSuchElementException e) {
+      /* everything is good */
+    }
+    catch (Exception e) {
+      fail("Removing from empty list threw the wrong type of exception.");
+    }
+    
+    list.addToBack(6);
+    list.addToBack(7);
+    assertEquals("Removing element added to back of list", new Integer(6), list.removeFromFront());
+    assertEquals("Removing second element added to back", new Integer(7), list.removeFromFront());
+  }
+  
+  /**
+   * Tests the removeFromBack method of DoubleLinkedList.
+   */
+  @Test
+  public void testRemoveFromBack() {
+    LinkedList<Integer> list = new LinkedList<Integer>();
+    list.addToBack(5);
+    list.addToFront(4);
+    list.addToBack(6);
+    
+    assertEquals("Removing element from back of list", new Integer(6), list.removeFromBack());
+    assertEquals("Removing second element from back of list", new Integer(5), list.removeFromBack());
+    assertEquals("Removing element from back that was added to front", new Integer(4), list.removeFromBack());
+    assertEquals("Removing last element of list", true, list.isEmpty());
+    try {
+      list.removeFromBack();
+      fail("Removing from empty list did not throw an exception.");
+    }
+    catch (java.util.NoSuchElementException e) {
+      /* everything is good */
+    }
+    catch (Exception e) {
+      fail("Removing from empty list threw the wrong type of exception.");
+    }
+  }
+  
+  /**
+   * Tests the linked list iterator.
+   */
+  @Test
+  public void testListIterator() {
+    LinkedList<Integer> list = new LinkedList<Integer>();
+    for (int i = 5; i > 0; i--)
+      list.addToFront(i);
+    
+    /* checking that we get out what we put it */
+    int i = 1;
+    for (Integer x: list)
+      assertEquals("Testing value returned by iterator", new Integer(i++), x);
+    
+    if (i != 6)
+      fail("The iterator did not run through all the elements of the list");
+  }
+  
+  
+  @Test
+  public void testflipPileOver(){
+    Pile p = new Pile();
+    p.addToBack(new Card(Card.Suit.Spades, Card.Face.Four));
+    p.addToBack(new Card(Card.Suit.Hearts, Card.Face.Three));
+    p.addToBack(new Card(Card.Suit.Hearts, Card.Face.Seven));
+    p.addToBack(new Card(Card.Suit.Spades, Card.Face.Six));
+    p.addToBack(new Card(Card.Suit.Hearts, Card.Face.Five));
+    p.flipPileOver();
+    
+    Pile.Node nodeptr = p.getFront(); 
+    for(int i = 0; nodeptr.getNext() != null; i++){
+      assertTrue(!nodeptr.getElement().isFaceUp());
+      nodeptr = nodeptr.getNext();
+    }
+  }
+  
+  @Test
+  public void testflipPileFaceUp(){
+    Pile p = new Pile();
+    p.addToBack(new Card(Card.Suit.Spades, Card.Face.Four));
+    p.addToBack(new Card(Card.Suit.Hearts, Card.Face.Three));
+    p.addToBack(new Card(Card.Suit.Hearts, Card.Face.Seven));
+    p.addToBack(new Card(Card.Suit.Spades, Card.Face.Six));
+    p.addToBack(new Card(Card.Suit.Hearts, Card.Face.Five));
+    p.flipPileOver();
+    p.flipPileFaceUp();
+    Pile.Node nodeptr = p.getFront(); 
+    for(int i = 0; nodeptr.getNext() != null; i++){
+      assertTrue(nodeptr.getElement().isFaceUp());
+      nodeptr = nodeptr.getNext();
+    }
+  }
+  
+  @Test
+  public void testClearPile(){
+    Pile p = new Pile();
+    p.addToBack(new Card(Card.Suit.Spades, Card.Face.Four));
+    p.addToBack(new Card(Card.Suit.Hearts, Card.Face.Three));
+    p.addToBack(new Card(Card.Suit.Hearts, Card.Face.Seven));
+    p.addToBack(new Card(Card.Suit.Spades, Card.Face.Six));
+    p.addToBack(new Card(Card.Suit.Hearts, Card.Face.Five));
+    p.clearPile();
+    assertTrue(p.getFront() == null);
+    assertTrue(p.getBack() == null);
+  }
+  
+  @Test
+  public void testGetBottomShown(){
+    Pile p = new Pile();
+    p.addToBack(new Card(Card.Suit.Spades, Card.Face.Four));
+    p.addToBack(new Card(Card.Suit.Hearts, Card.Face.Three));
+    p.addToBack(new Card(Card.Suit.Hearts, Card.Face.Seven));
+    p.addToBack(new Card(Card.Suit.Spades, Card.Face.Six));
+    p.addToBack(new Card(Card.Suit.Hearts, Card.Face.Five));
+    p.flipPileFaceUp();
+    compareCards(p.getBottomShown().getElement(), new Card(Card.Suit.Spades, Card.Face.Four));
+    
+    
+    p.flipPileFaceUp();
+    p.getFront().getElement().setFaceUp(false);
+    compareCards(p.getBottomShown().getElement(), new Card(Card.Suit.Hearts, Card.Face.Three));
+    
+    p.flipPileFaceUp();
+    p.getFront().getElement().setFaceUp(false);
+    compareCards(p.getBottomShown().getElement(), new Card(Card.Suit.Hearts, Card.Face.Three));
+  
+  }
+  
+  
+  @Test void testIntializeGame(){
+    Solitaire s = new Solitaire(new Deck(), 7);
+    s.intializeGame();
+    
+    for(int i = 0; i < s.getPiles().length; i++){
+      assertTrue(s.getPiles()[i].length() == i + 1);
+      
+    }
+    
+    for(int i = 0; i < s.getFoundations().length; i++){
+      assertTrue(s.getFoundations()[i].length() == 0);
+    }
+
+    assertTrue(s.getStock().length() == 24);
+    
+  }
+  
+  
+  
+  
+  @Test
+  public void activeToActive(){
+    
+    Solitaire s = new Solitaire(new Deck(), 7);
+    s.getPiles()[2].setFront(null);
+    s.getPiles()[2].setBack(null);
+    s.getPiles()[3].setFront(null);
+    s.getPiles()[3].setBack(null);
+    s.getPiles()[2].addToBack(new Card(Card.Suit.Spades, Card.Face.Four));
+    s.getPiles()[2].addToBack(new Card(Card.Suit.Hearts, Card.Face.Three));
+    s.getPiles()[3].addToBack(new Card(Card.Suit.Hearts, Card.Face.Seven));
+    s.getPiles()[3].addToBack(new Card(Card.Suit.Spades, Card.Face.Six));
+    s.getPiles()[3].addToBack(new Card(Card.Suit.Hearts, Card.Face.Five));
+    
+    try{
+      s.moveActiveToActive(3, 4);
+    } catch(Exception e){
+      
+    }
+    s.getPiles()[2].flipPileFaceUp();
+    s.getPiles()[3].flipPileFaceUp();
+    s.printBoard(); 
+    
+    assertTrue(s.getPiles()[2].isEmpty());
+   
+  }
+
+
+    
+  }
+  

@@ -1,0 +1,60 @@
+public class Pile extends LinkedList<Card>{
+  
+  /**
+   *This class represents that a pile in the game of solitare.
+   *  
+   */
+  public void flipPileOver(){
+    
+    Node currentCard = getFront();
+    
+    for(int i = 0; currentCard != null; i++){
+      currentCard.getElement().setFaceUp(false);
+      currentCard = currentCard.getNext();  
+    }
+  }
+  
+  /**
+   * 
+   */
+  public void flipPileFaceUp(){
+    
+    Node currentCard = getFront();
+    
+    for(int i = 0; currentCard != null; i++){
+      currentCard.getElement().setFaceUp(true);
+      currentCard = currentCard.getNext();  
+    }
+  }
+  
+  /**Clears the pile.
+   */
+  public void clearPile(){
+    setFront(null);
+    setBack(null);
+  }
+  
+  
+  /**This returns the bottom most faceup card within the pile
+    */
+  public Node getBottomShown(){
+    boolean foundFaceUp = false;
+    
+    Node nodeptr = getFront();
+    
+    if(nodeptr.getElement().isFaceUp()){
+      return nodeptr;
+    }
+    
+    
+    while(nodeptr.getElement().isFaceUp() != true){
+      nodeptr = nodeptr.getNext();
+      foundFaceUp = true;
+    }
+    
+    if(foundFaceUp == false){
+      return null;
+    }
+    return nodeptr;
+  }
+}

@@ -1,0 +1,232 @@
+import java.util.Scanner;
+
+public class Soltaire{
+  
+  private int placeHolder = 0;
+  
+  private Deck deck;
+  
+  private Pile[] piles;
+  
+  private Pile[] foundations;
+  
+  private Pile stock = new Pile();
+  
+  private Pile tableau = new Pile();
+
+  private boolean gameUnfinished = true;
+  
+  private Scanner scanner = new Scanner(System.in);
+  
+  public static void main(String[] args){
+    Soltaire s = new Soltaire(new Deck(), 7);
+    
+    
+  }
+  
+
+  
+  public Soltaire(Deck deck, int numActivePiles){
+    
+    this.deck = deck;
+    
+    this.piles = new Pile[numActivePiles];
+    
+    this.foundations = new Pile[deck.getNumberSuits()];
+    
+    for(int i = 0; i < piles.length; i++){
+      piles[i] = new Pile();
+    }
+  
+    for(int i = 0; i < getFoundations().length; i++){
+      getFoundations()[i] = new Pile();
+    }
+                                                    
+    intializeGame();
+  }
+  
+  
+  public Pile[] getFoundations(){
+    return foundations;
+  }
+  
+  public Pile[] getPiles(){
+    return piles; 
+  }
+  
+  public Pile getStock(){
+    return stock;
+  }
+  
+  public Pile getTableau(){
+    return tableau;
+  }
+  
+  public Deck getDeck(){
+   return deck; 
+  }
+  
+  public void playGame(){
+    
+    moveStockToTableau();
+    
+    while(gameUnfinished){
+      
+      
+      for(int i = 0; i < getFoundations().length; i++){
+        System.out.print("F" + (i+1) + ": ");
+        getFoundations()[i].print();
+       
+      }
+      System.out.println(" ");
+      
+      for(int i = 0; i < getPiles().length; i++){
+        System.out.print("P" + (i+1) + ": ");
+        getPiles()[i].print();
+
+      }
+      System.out.println(" ");
+      
+      System.out.print("Stock: ");
+      getStock().print();
+      System.out.println(" ");
+      System.out.print("Tableau: ");
+      getTableau().print();
+      
+      
+      scanner.hasNext();
+    }
+  }
+  
+  
+  public void intializeGame(){
+    
+    deck.shuffle();
+    
+    placeHolder = deck.size() - 1;
+    
+    for(int i = 0; i < piles.length; i++){
+      for(int j = 0; j <= i; j++){
+        if(j == 0){
+          getPiles()[i].addToFront(deck.get(placeHolder));
+          getPiles()[i].getFront().getElement().setFaceUp(true);
+          placeHolder--;
+        } else {
+          getPiles()[i].addToFront(deck.get(placeHolder));
+          placeHolder--;
+        }
+      }
+    }
+    
+    while(placeHolder >= 0){
+      getStock().addToFront(deck.get(placeHolder));
+      placeHolder--;
+    }
+    
+    getStock().getFront().getElement().setFaceUp(true);
+    
+  }
+  
+  
+  public static boolean checkSuits(Card topCard, Card bottomCard){
+    if(topCard.getCurrentSuit().compareTo(bottomCard.getCurrentSuit()) == 0){
+      return true;
+    } else {
+      return false;
+    }
+  }
+  
+  public static boolean checkLowerCard(Card topCard, Card bottomCard){
+    if(topCard.getCurrentFace().compareTo(bottomCard.getCurrentFace()) == -1){
+      return true;
+    } else {
+      return false;
+    }
+  }
+  
+  
+  public static boolean checkHigherCard(Card topCard, Card bottomCard){
+    if(topCard.getCurrentFace().compareTo(bottomCard.getCurrentFace()) == 1){
+      return true;
+    } else {
+      return false;
+    }
+  }
+  
+  public void moveStockToTableau(){
+    if(getTableau().getFront() != null){
+      getTableau().getFront().getElement().setFaceUp(false);
+    }
+    if(getStock().length() > 3){
+      for(int i = 0; i < 3; i++){
+        getTableau().addToFront(getStock().getFront().getElement());
+        getStock().removeFront();
+        getTableau().getFront().getElement().setFaceUp(true);
+      } 
+    } else { 
+      for(int i = 0; i < getStock().length(); i++){  
+        getTableau().addToFront(getStock().getFront().getElement());
+        getStock().removeFront();   
+      } 
+    }
+    
+    getStock().getFront().getElement().setFaceUp(true);
+  }
+  
+  
+  
+  public void moveTableauToStock(){
+    for(int i = 0; i < getTableau().length(); i++){
+      getStock().addToFront(getTableau().getFront().getElement());
+      getStock().getFront().getElement().setFaceUp(false);
+      getTableau().removeFront();
+    }
+  }
+  
+  
+  public void movePileToFoundation(int pileNumber){  
+    
+    if(getPiles()[pileNumber - 1].getFront().getElement().getCurrentFace().compareTo(getDeck().getMinFace()) == 0){
+      for(int i = 0; i < getFoundations().length; i++){
+        if(getFoundations()[i].getFront() == null){
+          getFoundations()[i].addToFront(getPiles()[pileNumber - 1].getFront().getElement());
+          getPiles()[pileNumber - 1].removeFront();
+          getPiles()[pileNumber - 1].getFront().getElement().setFaceUp(true);
+        }
+      }
+    } else {
+      for(int i = 0; i < getFoundations().length; i++){
+        if(checkSuits(getPiles()[pileNumber - 1].getFront().getElement(), getFoundations()[i].getFront().getElement())){
+          if(checkHigherCard(getPiles()[pileNumber - 1].getFront().getElement(), getFoundations()[i].getFront().getElement())){
+            getFoundations()[i].addToFront(getPiles()[pileNumber - 1].getFront().getElement());
+            getPiles()[pileNumber - 1].removeFront();
+            getPiles()[pileNumber - 1].getFront().getElement().setFaceUp(true);
+            
+          }
+        }
+      }
+    }
+  }
+  
+  
+  public void moveTableauToActive(int pileNumber) throws NoValidMoveException{
+    if(getTableau().isEmpty()){
+      throw new NoValidMoveException();
+    } else if(checkLowerCard(getPiles()[pileNumber - 1].getFront().getElement(), getTableau().getFront().getElement())){
+      getPiles()[pileNumber - 1].getFront().getElement().setFaceUp(false);
+      getPiles()[pileNumber - 1].addToFront(getTableau().getFront().getElement());
+      getTableau().removeFront();
+      getTableau().getFront().getElement().setFaceUp(true);
+      
+    } else {
+      throw new NoValidMoveException();
+    }
+  }
+  
+  public void moveActiveToActive(int pileNumber1, int pileNumber2){
+    
+  }
+  
+  
+  
+}
